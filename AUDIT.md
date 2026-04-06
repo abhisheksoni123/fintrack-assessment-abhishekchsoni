@@ -1,0 +1,36 @@
+## Task 2 — Code Audit
+
+| #   | File                          | Location               | Severity | Category       | Description                                                          | Correct Fix                                     |
+| --- | ----------------------------- | ---------------------- | -------- | -------------- | -------------------------------------------------------------------- | ----------------------------------------------- |
+| 1   | `route.ts`                    | POST – raw SQL insert  | Critical | Security       | SQL Injection vulnerability via string interpolation in INSERT query | Use parameterized queries or ORM insert         |
+| 2   | `route.ts`                    | GET – raw SQL          | Critical | Security       | SQL Injection via `id` query parameter                               | Use ORM or parameterized query                  |
+| 3   | `route.ts`                    | error handling         | Critical | Compliance     | Returning `error.stack` exposes internal details                     | Return generic error message and log internally |
+| 4   | `reconciler.ts`               | `findMatch`            | High     | Logic          | Matching only by amount leads to incorrect matches                   | Use amount + reference + date tolerance         |
+| 5   | `reconciler.ts`               | reconciliation loop    | High     | Logic          | Discrepancies array never populated                                  | Implement discrepancy detection logic           |
+| 6   | `reconciler.ts`               | currency handling      | High     | Logic          | No validation for USD-only requirement                               | Filter or flag non-USD records                  |
+| 7   | `reconciler.ts`               | totals calculation     | High     | Logic          | Includes bank records outside period                                 | Filter bank records within period               |
+| 8   | `reconciler.ts`               | totals calculation     | High     | Logic          | Includes all system payments regardless of match                     | Restrict to relevant subset                     |
+| 9   | `reconciler.ts`               | `markReconciled`       | High     | Logic          | Marks payment reconciled based on weak match                         | Only update after strong validation             |
+| 10  | `reconciler.ts`               | `markReconciled` query | Medium   | Performance    | Extra DB read before update                                          | Use single conditional update query             |
+| 11  | `reconciler.ts`               | loop with await        | Medium   | Performance    | Sequential DB updates degrade performance                            | Batch or parallelize updates                    |
+| 12  | `reconciler.ts`               | date parsing           | Medium   | Logic          | Potential timezone inconsistencies                                   | Normalize to UTC explicitly                     |
+| 13  | `reconciler.ts`               | `isInPeriod`           | Medium   | Logic          | End boundary is exclusive                                            | Clarify or use inclusive comparison             |
+| 14  | `reconciler.ts`               | unmatched logic        | Medium   | Logic          | Includes out-of-period bank records                                  | Filter before classification                    |
+| 15  | `reconciler.ts`               | discrepancies array    | Medium   | Logic          | Always empty                                                         | Populate correctly                              |
+| 16  | `reconciler.ts`               | money handling         | High     | Compliance     | Uses floating point for currency                                     | Use integer cents or decimal library            |
+| 17  | `reconciler.ts`               | DB operations          | Critical | Data Integrity | No transaction for multiple DB operations                            | Wrap in DB transaction                          |
+| 18  | `route.ts`                    | request validation     | Low      | API            | Accepts empty bankData                                               | Enforce minimum length                          |
+| 19  | `route.ts`                    | status lifecycle       | Medium   | Logic          | Run status not updated properly                                      | Implement status transitions                    |
+| 20  | `route.ts`                    | idempotency            | High     | Logic          | Duplicate runs possible                                              | Add idempotency mechanism                       |
+| 21  | `route.ts`                    | GET response shape     | Medium   | API            | Response format inconsistent with frontend                           | Return `{ runs: [...] }`                        |
+| 22  | `route.ts`                    | GET without id         | Medium   | API            | Invalid query if id missing                                          | Handle null or support list endpoint            |
+| 23  | `route.ts`                    | auth                   | Critical | Security       | No authentication/authorization                                      | Add auth and RBAC                               |
+| 24  | `route.ts`                    | rate limiting          | Medium   | Security       | No rate limiting                                                     | Implement rate limiting                         |
+| 25  | `ReconciliationDashboard.tsx` | useEffect              | Medium   | Performance    | setInterval without cleanup                                          | Add cleanup with clearInterval                  |
+| 26  | `ReconciliationDashboard.tsx` | API usage              | High     | API            | Calls endpoint without required params                               | Fix API or endpoint contract                    |
+| 27  | `ReconciliationDashboard.tsx` | error handling         | Low      | UX             | Errors silently ignored                                              | Add error handling/logging                      |
+| 28  | `ReconciliationDashboard.tsx` | date display           | Low      | UX             | Raw dates shown                                                      | Format dates properly                           |
+| 29  | `reconciler.ts`               | duplicate handling     | High     | Logic          | Duplicate bank records not handled                                   | Deduplicate using transactionId                 |
+| 30  | `reconciler.ts`               | audit trail            | High     | Compliance     | Detailed results not persisted                                       | Store matched/unmatched/discrepancies           |
+| 31  | `route.ts`                    | notes field            | Medium   | Security       | Unsanitized input stored                                             | Sanitize input                                  |
+| 32  | `reconciler.ts`               | scalability            | Medium   | Performance    | Loads all records in memory                                          | Use pagination or streaming                     |
